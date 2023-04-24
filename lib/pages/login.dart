@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:latihan_flutter/pages/home.dart';
+import 'package:latihan_flutter/pages/index.dart';
 import 'package:latihan_flutter/pages/register.dart';
 import 'package:latihan_flutter/theme.dart';
 
@@ -120,7 +121,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 onPressed: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context){
-                            return const HomePage();
+                            return const MainPage();
                           }));
                 }, 
                 child: Text('Log in', style: headLandBold.copyWith(color: Colors.white),)

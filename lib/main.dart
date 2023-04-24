@@ -13,6 +13,7 @@ class DebiApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
+      title: 'Project Meuble',
       debugShowCheckedModeBanner: false,
       home: LoginPage(),
       
