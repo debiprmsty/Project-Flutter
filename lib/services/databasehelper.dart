@@ -5,20 +5,17 @@ import 'dart:async';
 // ignore: depend_on_referenced_packages
 import 'package:path/path.dart';
 
-
-
-
 class DatabaseHelper {
   DatabaseHelper._myConn();
   static final DatabaseHelper instance = DatabaseHelper._myConn();
   Database?  _db;
 
-  
-
   String productTable = 'product';
   String colId = 'id';
   String colTitle = 'title';
   String colDesc = 'desc';
+  String colImage = 'image';
+  String colPrice = 'price';
 
   Future<Database> get db async {
     if (_db == null) {
@@ -35,8 +32,8 @@ class DatabaseHelper {
 
   void _createDb(Database db, int version) async {
     await db.execute(
-        'CREATE TABLE $productTable($colId INTEGER PRIMARY KEY AUTOINCREMENT, $colTitle TEXT, '
-        '$colDesc TEXT)');
+        'CREATE TABLE $productTable($colId INTEGER PRIMARY KEY AUTOINCREMENT, '
+        '$colTitle TEXT, $colDesc TEXT, $colImage TEXT, $colPrice REAL)');
   }
 
   Future<List<Map<String, dynamic>>> getProductMapList() async {
@@ -84,8 +81,6 @@ class DatabaseHelper {
     }
     throw Exception('Product not found');
   }
-
-
 }
 
 

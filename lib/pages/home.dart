@@ -297,7 +297,7 @@ class _HomePageState extends State<HomePage> {
                     Expanded(
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
-                        height: 270,
+                        height: 320,
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: const BorderRadius.all(Radius.circular(20)),
@@ -356,7 +356,7 @@ class _HomePageState extends State<HomePage> {
                     Expanded(
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
-                        height: 270,
+                        height: 320,
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: const BorderRadius.all(Radius.circular(20)),

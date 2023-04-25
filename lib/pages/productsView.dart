@@ -53,15 +53,16 @@ class _ProductsViewState extends State<ProductsView> {
     child: GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: 10,
+      itemCount:2,
+      
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        mainAxisSpacing: 50,
-        crossAxisSpacing: 10
+        crossAxisSpacing: 20, // ubah nilai crossAxisSpacing menjadi lebih besar
+        mainAxisSpacing: 20,
+        childAspectRatio: (width / height),
       ),
       itemBuilder: (BuildContext context, int index) {
-        return Container(
-          constraints: BoxConstraints(maxHeight: 500),
+        return Expanded(
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
             decoration: BoxDecoration(

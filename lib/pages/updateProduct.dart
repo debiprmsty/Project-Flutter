@@ -1,26 +1,41 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:latihan_flutter/models/product.dart';
 import 'package:latihan_flutter/pages/products.dart';
 import 'package:latihan_flutter/services/databasehelper.dart';
 import 'package:latihan_flutter/theme.dart';
-
+import 'package:image_picker/image_picker.dart';
 
 class UpdateProduct extends StatefulWidget {
-   final int productId;
-  const UpdateProduct({super.key, required this.productId});
+  final int productId;
+  const UpdateProduct({Key? key, required this.productId}) : super(key: key);
 
   @override
   State<UpdateProduct> createState() => _UpdateProductState();
 }
 
 class _UpdateProductState extends State<UpdateProduct> {
- final _formKey = GlobalKey<FormState>();
- final titleController = TextEditingController();
- final descController = TextEditingController();
- 
- 
- @override
+  final _formKey = GlobalKey<FormState>();
+  final titleController = TextEditingController();
+  final descController = TextEditingController();
+  final imageController = TextEditingController();
+  final priceController = TextEditingController();
+
+   late File? _getImage;
+
+  Future<void> _pickImage(ImageSource source) async {
+    final pickedFile = await ImagePicker().pickImage(source: source);
+
+    setState(() {
+      _getImage = File(pickedFile!.path);
+    });
+
+    imageController.text = _getImage!.path;
+  }
+
+  @override
   void initState() {
     super.initState();
     getProductData();
@@ -28,17 +43,24 @@ class _UpdateProductState extends State<UpdateProduct> {
 
   void getProductData() async {
     Product product = await DatabaseHelper.instance.getProductById(widget.productId);
+
+
     titleController.text = product.title;
     descController.text = product.desc;
+    imageController.text = product.image;
+    priceController.text = product.price.toStringAsFixed(2);
   }
-  
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: biruHitam,
-        title: Text('Update Data'),
+        title: Text(
+          'Create Data',
+          style: headLandBold.copyWith(color: Colors.white),
+        ),
+        centerTitle: true,
       ),
       body: SafeArea(
         child: Form(
@@ -53,21 +75,20 @@ class _UpdateProductState extends State<UpdateProduct> {
                   decoration: InputDecoration(labelText: 'Name'),
                   validator: (value) {
                     if (value!.isEmpty) {
-                      return 'Please enter your name.';
+                      return 'Please enter product name.';
                     }
                     return null;
                   },
-                  
                 ),
                 const SizedBox(
                   height: 8,
                 ),
-                 TextFormField(
+                TextFormField(
                   controller: descController,
-                  decoration: InputDecoration(labelText: 'Decription'),
+                  decoration: InputDecoration(labelText: 'Description'),
                   validator: (value) {
                     if (value!.isEmpty) {
-                      return 'Please enter your descri.';
+                      return 'Please enter product description.';
                     }
                     return null;
                   },
@@ -75,26 +96,102 @@ class _UpdateProductState extends State<UpdateProduct> {
                 const SizedBox(
                   height: 8,
                 ),
-                FilledButton(onPressed: () async {
-                  if(_formKey.currentState!.validate()) {
-                    _formKey.currentState!.save();
-                     String title = titleController.text;
-                     String desc = descController.text;
-          
-                    Product data = Product(id:widget.productId ,title: title, desc: desc);
-                    try {
-                      await DatabaseHelper.instance.updateProduct(data);
-                      title = '';
-                      desc = '';
-                      Navigator.pop(context);
-                    }catch(e) {
-                      Text('Gagal update data');
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: imageController,
+                        decoration: InputDecoration(labelText: 'Image URL'),
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Please enter product image URL.';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: context,
+                          builder: (BuildContext context){
+                            return Container(
+                                height: 150.0,
+                                child: Column(
+                                children: [
+                                  ListTile(
+                                    leading: Icon(Icons.camera_alt),
+                                    title: Text('Camera'),
+                                    onTap: () {
+                                    _pickImage(ImageSource.camera);
+                                    Navigator.pop(context);
+                                  },
+                                ),
+                                ListTile(
+                                  leading: Icon(Icons.photo_library),
+                                  title: Text('Gallery'),
+                                  onTap: () {
+                                    _pickImage(ImageSource.gallery);
+                                    Navigator.pop(context);
+                                  },
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    },
+                    icon: Icon(Icons.add_a_photo),
+                    tooltip: 'Add Image',
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 8,
+                ),
+                TextFormField(
+                  controller: priceController,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}'))
+                  ],
+                  decoration: InputDecoration(
+                      labelText: 'Price',
+                      prefixText: '\Rp ',
+                      ),
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Please enter product price.';
                     }
-                  }
+                    return null;
+                  },
+                ),
+                const SizedBox(
+                  height: 8,
+                ),
+                FilledButton(
+                    onPressed: () async {
+                      if (_formKey.currentState!.validate()) {
+                        _formKey.currentState!.save();
+                        String title = titleController.text;
+                        String desc = descController.text;
+                        String image = imageController.text;
+                        double price = double.parse(priceController.text);
 
-                 
+                        Product data = Product(
+                          id: widget.productId, // tambahkan id produk yang akan diupdate
+                          title: title,
+                          desc: desc,
+                          image: image,
+                          price: price
+                        );
 
-                }, child: Text('Submit'))
+                        await DatabaseHelper.instance.updateProduct(data); // panggil fungsi updateProduct
+
+                        Navigator.pop(context);
+                      }
+                    }
+, child: Text('Submit'))
               ],
             ),
           )
@@ -103,3 +200,11 @@ class _UpdateProductState extends State<UpdateProduct> {
     );
   }
 }
+
+
+
+
+
+
+
+// }

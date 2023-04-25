@@ -1,5 +1,7 @@
 // ignore_for_file: unnecessary_import
 
+import 'dart:io';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:latihan_flutter/pages/updateProduct.dart';
@@ -8,7 +10,9 @@ import 'package:latihan_flutter/models/product.dart';
 import 'package:latihan_flutter/pages/addproduct.dart';
 import 'package:latihan_flutter/theme.dart';
 import 'package:sqflite/sqflite.dart';
-
+import 'dart:convert';
+import 'dart:typed_data';
+import 'package:cached_network_image/cached_network_image.dart';
 
 
 
@@ -22,6 +26,7 @@ class ProductPage extends StatefulWidget {
 
 class _ProductPageState extends State<ProductPage> {
   late Future<List<Product>> _productListFuture;
+  Key myKey = UniqueKey();
 
   @override
   void initState() {
@@ -58,6 +63,7 @@ class _ProductPageState extends State<ProductPage> {
       body: Container(
         padding: EdgeInsets.all(20),
         child: FutureBuilder<List<Product>>(
+           key: UniqueKey(),
             future: getProductList(),
             builder: (context, snapshot) {
               while(!snapshot.hasData) {
@@ -67,9 +73,13 @@ class _ProductPageState extends State<ProductPage> {
                 return Center(child: Text('Tidak ada data'));
               }else {
                 return ListView.builder(
+                 
                   itemCount: snapshot.data!.length,
                   itemBuilder: (BuildContext context, int index) {
                     Product product = snapshot.data![index];
+                    
+                    File imageFile = File(product.image);
+
                     return Container(
                       width: width,
                       height: 65,
@@ -87,11 +97,11 @@ class _ProductPageState extends State<ProductPage> {
                           ],
                       ),
                       child: ListTile(
-                        leading: Container(
+                         leading: Container(
                           padding: const EdgeInsets.only(top: 10),
                           width: 80,
-                          height:160,
-                          child: Image.asset('asset/images/2.jpg', fit: BoxFit.cover),
+                          height: 160,
+                          child: Image.file(imageFile, fit: BoxFit.cover),
                         ),
                         title: Container(
                           margin: const EdgeInsets.only(top: 6),
@@ -106,16 +116,19 @@ class _ProductPageState extends State<ProductPage> {
                                   return UpdateProduct(productId: product.id!);
                                 }));
                               }, icon: Icon(Icons.edit, color: biruLangit,)),
-                              IconButton(onPressed: () async {
-                                try{
-                                  await DatabaseHelper.instance.deleteProduct(product.id!);
-                                  setState(() {
-                                    getProductList();
-                                  });
-                                } catch(e) {
-                                  print(e.toString());
-                                }
-                              }, icon: Icon(Icons.delete, color: Colors.pink,))
+                              IconButton(
+                                onPressed: () async {
+                                        try{
+                                          await DatabaseHelper.instance.deleteProduct(product.id!);
+                                          setState(() {
+                                            getProductList();
+                                          });
+                                        } catch(e) {
+                                          print(e.toString());
+                                          rethrow;
+                                        }
+                                      }
+                                      , icon: Icon(Icons.delete, color: Colors.pink,))
                             ],
                           )
                         ),
